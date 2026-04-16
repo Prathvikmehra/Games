@@ -7,12 +7,17 @@ const accuracyDisplay = document.querySelector('#accuracy');
 const bestWPMDisplay = document.querySelector('#bestWPM');
 const startBtn = document.querySelector('#startBtn');
 const resetBtn = document.querySelector('#resetBtn');
-// Test texts
+
+// Test texts (Short paragraphs for smooth transitions)
 const testTexts = [
     "The quick brown fox jumps over the lazy dog. Practice makes perfect when learning to type faster.",
     "Technology has revolutionized the way we communicate and work in the modern digital era.",
-    "Typing speed is an essential skill for anyone working with computers in today's workplace."
+    "Typing speed is an essential skill for anyone working with computers in today's workplace.",
+    "JavaScript is a versatile programming language primarily used for web development and beyond.",
+    "A journey of a thousand miles begins with a single step, so keep practicing every single day.",
+    "Consistency is the key to mastering any new skill, including typing without looking at the keys."
 ];
+
 // Game state
 let currentText = '';
 let timeLeft = 60;
@@ -20,14 +25,31 @@ let timerInterval = null;
 let startTime = null;
 let isTestActive = false;
 let bestWPM = 0;
+
+// Persistent session stats for multi-sentence
+let totalTypedEntries = 0; // Total correct characters typed across all sentences in this session
+let totalErrors = 0;
+
 // Initialize
 loadBestWPM();
+
+// Make typing container focusable for the overlay effect
+textDisplay.parentElement.classList.add('typing-overlay');
+textDisplay.insertAdjacentHTML('afterend', '<div class="start-prompt"><i class="fas fa-hand-pointer"></i> Click here & start typing</div>');
+
+// Click text to focus input
+textDisplay.parentElement.addEventListener('click', () => {
+    if(!isTestActive && !startBtn.disabled) return; // Only allow focus if started
+    typingArea.focus();
+});
+
 // Load best WPM from sessionStorage
 function loadBestWPM() {
     const saved = sessionStorage.getItem('typingTestBestWPM');
     bestWPM = saved !== null ? parseInt(saved) : 0;
     bestWPMDisplay.innerText = bestWPM;
 }
+
 // Save best WPM
 function saveBestWPM(wpm) {
     if (wpm > bestWPM) {
@@ -36,45 +58,65 @@ function saveBestWPM(wpm) {
         bestWPMDisplay.innerText = bestWPM;
     }
 }
-// Load next text (new function)
-function loadNextText() {
-    // Pick a new random text (avoid same as current if possible, but simple random)
+
+function getRandomText() {
     let newText;
     do {
         newText = testTexts[Math.floor(Math.random() * testTexts.length)];
-    } while (newText === currentText);  // Optional: Ensure different sentence
-    currentText = newText;
-    textDisplay.innerText = currentText;
-    typingArea.value = '';  // Clear input for new sentence
-    typingArea.focus();
-    // Reset accuracy display to 100% for new sentence
-    accuracyDisplay.innerText = '100%';
+    } while (newText === currentText && testTexts.length > 1);
+    return newText;
 }
+
+// Load next text 
+function loadNextText() {
+    // Accumulate stats from current string before wiping
+    const typedText = typingArea.value;
+    
+    let correctInCurrent = 0;
+    for (let i = 0; i < typedText.length; i++) {
+        if (typedText[i] === currentText[i]) correctInCurrent++;
+    }
+    
+    totalTypedEntries += correctInCurrent;
+    
+    // Load new text
+    currentText = getRandomText();
+    highlightText(''); // Initial blank render
+    
+    typingArea.value = '';  
+    typingArea.focus();
+}
+
 // Start test
 function startTest() {
     // Reset state
     timeLeft = 60;
     isTestActive = true;
     startTime = null;
+    totalTypedEntries = 0;
+    totalErrors = 0;
+    
+    wpmDisplay.innerText = '0';
+    accuracyDisplay.innerText = '100%';
+    timerDisplay.innerText = '60';
+    timerDisplay.style.color = '#e2b714'; 
    
-    // Get random text
-    currentText = testTexts[Math.floor(Math.random() * testTexts.length)];
-    textDisplay.innerText = currentText;
+    currentText = getRandomText();
+    highlightText(''); 
    
-    // Enable typing area
     typingArea.disabled = false;
     typingArea.value = '';
     typingArea.focus();
    
-    // Disable start button
     startBtn.disabled = true;
    
-    // Start timer
     timerInterval = setInterval(updateTimer, 1000);
 }
 
 // Update timer
 function updateTimer() {
+    if (!startTime) return; // Don't tick down until they actually start typing
+    
     timeLeft--;
     timerDisplay.innerText = timeLeft;
    
@@ -83,52 +125,68 @@ function updateTimer() {
     }
     // Warning color
     if (timeLeft <= 10) {
-        timerDisplay.style.color = '#ff6b6b';
+        timerDisplay.style.color = '#ca4754';
     }
 }
+
 // Handle typing input
 typingArea.addEventListener('input', function() {
     if (!isTestActive) return;
    
-    // Start time on first keystroke
+    // Start time on very first keystroke
     if (!startTime) {
         startTime = Date.now();
     }
    
+    const typedText = typingArea.value;
+    
+    // Count if the last pressed key was an error
+    if (typedText.length > 0) {
+        const lastCharIndex = typedText.length - 1;
+        if (typedText[lastCharIndex] !== currentText[lastCharIndex]) {
+            totalErrors++;
+        }
+    }
+
     updateStats();
-    highlightText();
+    highlightText(typedText);
+    
+    // Check if current sentence is fully correctly completed
+    if (typedText === currentText) {
+        loadNextText();
+    }
 });
+
 // Update statistics
 function updateStats() {
     const typedText = typingArea.value;
    
-    // Calculate WPM
-    const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
-    const words = typedText.trim().split(/\s+/).filter(w => w.length > 0);
-    const wpm = elapsedMinutes > 0 ? Math.round(words.length / elapsedMinutes) : 0;
-    wpmDisplay.innerText = wpm;
-   
-    // Calculate accuracy
-    let correctChars = 0;
-    for (let i = 0; i < typedText.length; i++) {
+    // Calculate total correct in current buffer
+    let correctInCurrent = 0;
+    for (let i = 0; i < Math.min(typedText.length, currentText.length); i++) {
         if (typedText[i] === currentText[i]) {
-            correctChars++;
+            correctInCurrent++;
         }
     }
+    
+    const grossCorrectEntries = totalTypedEntries + correctInCurrent;
+    const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
+    
+    // Standard WPM: (Total characters / 5) / time
+    const wpm = elapsedMinutes > 0 ? Math.round((grossCorrectEntries / 5) / elapsedMinutes) : 0;
+    wpmDisplay.innerText = wpm;
    
-    const accuracy = typedText.length > 0
-        ? (correctChars / typedText.length * 100).toFixed(1)
+    // Accuracy
+    const totalKeystrokes = grossCorrectEntries + totalErrors;
+    const accuracy = totalKeystrokes > 0 
+        ? ((grossCorrectEntries / totalKeystrokes) * 100).toFixed(1) 
         : 100;
+        
     accuracyDisplay.innerText = `${accuracy}%`;
-
-    // New: Check if current sentence is completed
-    if (typedText.trim() === currentText.trim() && timeLeft > 10) {
-        loadNextText();
-    }
 }
+
 // Highlight typed text
-function highlightText() {
-    const typedText = typingArea.value;
+function highlightText(typedText) {
     let highlightedHTML = '';
    
     for (let i = 0; i < currentText.length; i++) {
@@ -147,6 +205,7 @@ function highlightText() {
    
     textDisplay.innerHTML = highlightedHTML;
 }
+
 // End test
 function endTest() {
     isTestActive = false;
@@ -157,16 +216,36 @@ function endTest() {
     const finalWPM = parseInt(wpmDisplay.innerText);
     saveBestWPM(finalWPM);
    
-    alert(`Test Complete!\nWPM: ${finalWPM}\nAccuracy: ${accuracyDisplay.innerText}`);
+    // Wait slightly so UI updates
+    setTimeout(() => {
+        alert(`Test Complete!\nSpeed: ${finalWPM} WPM\nAccuracy: ${accuracyDisplay.innerText}`);
+    }, 100);
 }
+
 // Reset session
 function resetSession() {
-    if (confirm('Reset session best score?')) {
+    // End current test if active
+    if(isTestActive) {
+        clearInterval(timerInterval);
+        isTestActive = false;
+        typingArea.disabled = true;
+        startBtn.disabled = false;
+        textDisplay.innerHTML = 'Click "Start Test" to begin typing!';
+        timerDisplay.innerText = '60';
+        wpmDisplay.innerText = '0';
+        accuracyDisplay.innerText = '100%';
+        timerDisplay.style.color = '#e2b714';
+    }
+    
+    if (bestWPM > 0 && confirm('Reset session best score?')) {
         sessionStorage.removeItem('typingTestBestWPM');
         bestWPM = 0;
         bestWPMDisplay.innerText = 0;
     }
 }
+
+// Default state text
+textDisplay.innerHTML = 'Click "Start Test" to begin typing!';
 
 // Event listeners
 startBtn.addEventListener('click', startTest);

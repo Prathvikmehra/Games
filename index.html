@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Collection Hub</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #cbd5e1;
+            font-size: 1.1em;
+        }
+
+        /* Modern Table Rules */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .games-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 15px; /* Spacing between rows */
+        }
+
+        .games-table th {
+            text-align: left;
+            padding: 0 20px;
+            color: #94a3b8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+
+        .games-table td {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            vertical-align: middle;
+        }
+        
+        .games-table tr:hover td {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.01);
+        }
+
+        .games-table td:first-child {
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+
+        .games-table td:last-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .game-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .game-icon {
+            font-size: 1.5em;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: #00f2fe;
+        }
+
+        .game-desc {
+            color: #cbd5e1;
+            font-size: 0.95em;
+            line-height: 1.5;
+            max-width: 400px;
+        }
+
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            white-space: nowrap;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+            color: #fff;
+        }
+
+        @media screen and (max-width: 768px) {
+            .games-table thead {
+                display: none;
+            }
+            .games-table, .games-table tbody, .games-table tr, .games-table td {
+                display: block;
+                width: 100%;
+            }
+            .games-table tr {
+                margin-bottom: 20px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+            }
+            .games-table td {
+                text-align: center;
+                border: none !important;
+                padding: 15px;
+            }
+            .game-title {
+                flex-direction: column;
+                justify-content: center;
+            }
+            .game-desc {
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Games Collection</h1>
+            <p>Welcome to the central hub! Choose a game to play from the list below.</p>
+        </div>
+
+        <div class="table-container">
+            <table class="games-table">
+                <thead>
+                    <tr>
+                        <th>Application</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Color Guesser -->
+                    <tr>
+                        <td>
+                            <div class="game-title">
+                                <div class="game-icon"><i class="fas fa-palette"></i></div>
+                                Color Guesser
+                            </div>
+                        </td>
+                        <td>
+                            <div class="game-desc">Test your RGB color knowledge by guessing the correct color block from a hex code.</div>
+                        </td>
+                        <td>
+                            <a href="https://games-wf1s.vercel.app/" target="_blank" class="play-btn">
+                                <i class="fas fa-play"></i> Play Now
+                            </a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Todo List -->
+                    <tr>
+                        <td>
+                            <div class="game-title">
+                                <div class="game-icon" style="color: #69f0ae;"><i class="fas fa-list-check"></i></div>
+                                Todo List App
+                            </div>
+                        </td>
+                        <td>
+                            <div class="game-desc">A highly interactive task management application with advanced filtering capabilities.</div>
+                        </td>
+                        <td>
+                            <a href="https://games-r2dq.vercel.app/" target="_blank" class="play-btn" style="background: linear-gradient(135deg, #00e676, #1de9b6); box-shadow: 0 4px 15px rgba(29, 233, 182, 0.3);">
+                                <i class="fas fa-rocket"></i> Launch App
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Whack a Mole -->
+                    <tr>
+                        <td>
+                            <div class="game-title">
+                                <div class="game-icon" style="color: #ff6e40;"><i class="fas fa-hammer"></i></div>
+                                Whack-a-Mole
+                            </div>
+                        </td>
+                        <td>
+                            <div class="game-desc">Test your reflexes in this classic arcade game. Hit as many moles as you can in 30 seconds!</div>
+                        </td>
+                        <td>
+                            <a href="https://games-pvd1.vercel.app/" target="_blank" class="play-btn" style="background: linear-gradient(135deg, #ff6e40, #ff9e80); box-shadow: 0 4px 15px rgba(255, 110, 64, 0.3);">
+                                <i class="fas fa-play"></i> Play Now
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Typing Game -->
+                    <tr>
+                        <td>
+                            <div class="game-title">
+                                <div class="game-icon" style="color: #ffeb3b;"><i class="fas fa-keyboard"></i></div>
+                                Typing Speed Test
+                            </div>
+                        </td>
+                        <td>
+                            <div class="game-desc">Improve your typing speed and accuracy with real-time WPM statistics measurement.</div>
+                        </td>
+                        <td>
+                            <a href="https://games-o6s5.vercel.app/" target="_blank" class="play-btn" style="background: linear-gradient(135deg, #fbc02d, #ffeb3b); color: #333; box-shadow: 0 4px 15px rgba(251, 192, 45, 0.3);">
+                                <i class="fas fa-play"></i> Play Now
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
